@@ -118,7 +118,7 @@
                     </div>
                     
                     <div class="about-image">
-                        <img src="img/marc-mataro.jpg" alt="Marc Mataró - Arquitecte de solucions web PHP" width="400" height="500">
+                        <img src="img/Me.jpg" alt="Marc Mataró - Arquitecte de solucions web PHP" width="400" height="500">
                         <div class="experience-badge">
                             <span class="years">5+</span>
                             <span class="label">Anys d'experiència</span>

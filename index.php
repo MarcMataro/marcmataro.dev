@@ -91,7 +91,7 @@
                         </div>
                     </div>
                     <div class="about-image">
-                        <img src="img/marc-mataro.jpg" alt="Marc Mataró - Programador web PHP" width="400" height="500">
+                        <img src="img/Me.jpg" alt="Marc Mataró - Programador web PHP" width="400" height="500">
                     </div>
                 </div>
             </div>
