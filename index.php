@@ -332,6 +332,36 @@
         </div>
     </footer>
     
+    <!-- Language Selector -->
+    <div class="language-selector-bottom">
+        <button class="lang-toggle" aria-label="Canviar idioma" aria-haspopup="true" aria-expanded="false">
+            <img src="img/cat.png" alt="Català" class="flag-icon">
+            <span class="lang-text">CA</span>
+            <i class="fas fa-chevron-up"></i>
+        </button>
+        <ul class="lang-dropdown" role="menu">
+            <li role="none">
+                <a href="?lang=ca" class="lang-option active" role="menuitem" data-lang="ca">
+                    <img src="img/cat.png" alt="Català" class="flag-icon">
+                    <span>Català</span>
+                </a>
+            </li>
+            <li role="none">
+                <a href="?lang=es" class="lang-option" role="menuitem" data-lang="es">
+                    <img src="img/esp.png" alt="Español" class="flag-icon">
+                    <span>Español</span>
+                </a>
+            </li>
+            <li role="none">
+                <a href="?lang=en" class="lang-option" role="menuitem" data-lang="en">
+                    <img src="img/eng.png" alt="English" class="flag-icon">
+                    <span>English</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    
     <script src="js/script.js"></script>
+    <script src="js/language-selector.js"></script>
 </body>
 </html>
