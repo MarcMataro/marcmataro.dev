@@ -112,4 +112,46 @@ function getPageTitle($current_page) {
     $pageInfo = getPageInfo($current_page);
     return $pageInfo['title'] . ' - Panell de Control';
 }
+
+/**
+ * Genera un header de pàgina personalitzat amb títol i descripció
+ */
+function generarPageHeader($title, $description = '', $icon = 'fas fa-file-alt', $breadcrumb = []) {
+    echo '<div class="page-header">';
+    echo '<div class="page-header-content">';
+    
+    // Breadcrumb per defecte
+    if (empty($breadcrumb)) {
+        $breadcrumb = [
+            ['name' => 'Inici', 'url' => 'dashboard.php'],
+            ['name' => $title, 'url' => null]
+        ];
+    }
+    
+    echo '<div class="page-header-text">';
+    echo '<h1><i class="' . $icon . '"></i> ' . htmlspecialchars($title) . '</h1>';
+    
+    if (!empty($description)) {
+        echo '<p class="page-description">' . htmlspecialchars($description) . '</p>';
+    }
+    
+    // Mostrar breadcrumb
+    if (!empty($breadcrumb)) {
+        echo '<nav class="page-breadcrumb">';
+        foreach ($breadcrumb as $index => $item) {
+            if ($index > 0) echo '<span class="separator">›</span>';
+            
+            if ($item['url']) {
+                echo '<a href="' . htmlspecialchars($item['url']) . '">' . htmlspecialchars($item['name']) . '</a>';
+            } else {
+                echo '<span class="current">' . htmlspecialchars($item['name']) . '</span>';
+            }
+        }
+        echo '</nav>';
+    }
+    
+    echo '</div>'; // page-header-text
+    echo '</div>'; // page-header-content
+    echo '</div>'; // page-header
+}
 ?>

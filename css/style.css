@@ -345,7 +345,6 @@ header {
 
 .project-card {
     background: var(--color-white);
-    border-radius: 12px;
     overflow: hidden;
     box-shadow: var(--shadow);
     transition: var(--transition);
@@ -443,11 +442,35 @@ header {
     color: var(--color-white);
 }
 
+.project-links {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: auto;
+}
+
+.project-links .project-link {
+    flex: 1;
+    min-width: 120px;
+    font-size: 0.9rem;
+    padding: 0.6rem 1rem;
+}
+
+.project-links .project-link.github {
+    background-color: #333;
+    border-color: #333;
+    color: var(--color-white);
+}
+
+.project-links .project-link.github:hover {
+    background-color: #555;
+    border-color: #555;
+}
+
 .projects-cta {
     text-align: center;
     padding: 2.5rem;
     background: linear-gradient(135deg, var(--color-primary) 0%, #1a3a5a 100%);
-    border-radius: 12px;
     color: var(--color-white);
 }
 
@@ -482,7 +505,6 @@ header {
 
 .blog-card {
     background: var(--color-white);
-    border-radius: 12px;
     overflow: hidden;
     box-shadow: var(--shadow);
     transition: var(--transition);
@@ -690,7 +712,6 @@ header {
 .contact-form {
     background: var(--color-white);
     padding: 2.5rem;
-    border-radius: 12px;
     box-shadow: var(--shadow);
 }
 
@@ -783,7 +804,6 @@ header {
 }
 
 .map-container {
-    border-radius: 12px;
     overflow: hidden;
     box-shadow: var(--shadow);
 }

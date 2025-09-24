@@ -16,6 +16,50 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/bootstrap.min.css">
+    
+    <?php
+    // Funció per obtenir el base URL del projecte
+    function getBaseUrl() {
+        $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+        $host = $_SERVER['HTTP_HOST'];
+        
+        // Detectar el subdirectori automàticament
+        $scriptName = $_SERVER['SCRIPT_NAME']; // Ex: /marcmataro.dev/index.php
+        $pathParts = explode('/', $scriptName);
+        
+        // Si estem en un subdirectori (com /marcmataro.dev/), el detectem
+        if (count($pathParts) > 2 && $pathParts[1] !== '') {
+            return '/' . $pathParts[1]; // Retorna /marcmataro.dev
+        }
+        
+        return ''; // Si estem a l'arrel del domini
+    }
+    
+    $baseUrl = getBaseUrl();
+    
+    // Carregar projectes de la base de dades
+    try {
+        require_once '_classes/connexio.php';
+        require_once '_classes/projectes.php';
+        
+        $connexio = Connexio::getInstance();
+        $db = $connexio->getConnexio();
+        $gestorProjectes = new Projectes($db);
+        
+        // Obtenir projectes visibles i actius en català
+        $opcions = [
+            'on' => 'visible = 1 AND estat IN ("actiu", "desenvolupament")',
+            'ordre' => 'data_creacio DESC',
+            'limit' => 6  // Mostrar només 6 projectes destacats
+        ];
+        
+        $projectesDestacats = $gestorProjectes->obtenirAmbTraducio('ca', $opcions);
+    } catch (Exception $e) {
+        $projectesDestacats = []; // Array buit si hi ha error
+        error_log("Error carregant projectes a index.php: " . $e->getMessage());
+    }
+    ?>
+    
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -39,7 +83,7 @@
     <header role="banner">
         <nav class="nav-container" role="navigation" aria-label="Menú principal">
             <a href="index.php" class="logo" aria-label="Marc Mataró - Pàgina d'inici">
-                <img src="img/LogoM.png" class="logom" alt="Logotip de Marc Mataró - Programador web PHP">
+                <img src="<?php echo $baseUrl; ?>/img/LogoM.png" class="logom" alt="Logotip de Marc Mataró - Programador web PHP">
             </a>
             <ul class="nav-menu">
                 <li><a href="index.php" aria-current="page">Inici</a></li>
@@ -91,7 +135,7 @@
                         </div>
                     </div>
                     <div class="about-image">
-                        <img src="img/Me.jpg" alt="Marc Mataró - Programador web PHP" width="400" height="500">
+                        <img src="<?php echo $baseUrl; ?>/img/Me.jpg" alt="Marc Mataró - Programador web PHP" width="400" height="500">
                     </div>
                 </div>
             </div>
@@ -106,59 +150,96 @@
                 </div>
                 
                 <div class="projects-grid">
-                    <article class="project-card" itemscope itemtype="https://schema.org/CreativeWork">
-                        <div class="project-image">
-                            <img src="img/projectes/ecommerce-platform.jpg" alt="Plataforma E-commerce desenvolupada amb Laravel i Vue.js" width="600" height="400" itemprop="image">
-                        </div>
-                        <div class="project-content">
-                            <h3 itemprop="name">Plataforma E-commerce</h3>
-                            <p class="project-tech" itemprop="keywords">Laravel, Vue.js, MySQL, Redis</p>
-                            <p class="project-description" itemprop="description">Desenvolupament d'una plataforma de comerç electrònic amb carret de compra, sistema de pagaments i panell d'administració avançat.</p>
-                            <ul class="project-features">
-                                <li>Integració amb PayPal i Stripe</li>
-                                <li>Optimització per a SEO</li>
-                                <li>Panel d'admin amb analytics</li>
-                                <li>Gestor de continguts personalitzat</li>
-                            </ul>
-                            <a href="#" class="project-link" aria-label="Veure més detalls sobre el projecte Plataforma E-commerce">Veure projecte</a>
-                        </div>
-                    </article>
-                    
-                    <article class="project-card" itemscope itemtype="https://schema.org/CreativeWork">
-                        <div class="project-image">
-                            <img src="img/projectes/api-rest.jpg" alt="API REST per a gestió de recursos amb Symfony" width="600" height="400" itemprop="image">
-                        </div>
-                        <div class="project-content">
-                            <h3 itemprop="name">API REST Symfony</h3>
-                            <p class="project-tech" itemprop="keywords">Symfony, API Platform, JWT, PostgreSQL</p>
-                            <p class="project-description" itemprop="description">Disseny i implementació d'una API REST robusta per a gestió de recursos amb autenticació JWT i documentació automàtica.</p>
-                            <ul class="project-features">
-                                <li>Autenticació JWT</li>
-                                <li>Documentació automàtica amb OpenAPI</li>
-                                <li>Rate limiting i caching</li>
-                                <li>Tests units i funcionals</li>
-                            </ul>
-                            <a href="#" class="project-link" aria-label="Veure més detalls sobre el projecte API REST Symfony">Veure projecte</a>
-                        </div>
-                    </article>
-                    
-                    <article class="project-card" itemscope itemtype="https://schema.org/CreativeWork">
-                        <div class="project-image">
-                            <img src="img/projectes/sistema-reserves.jpg" alt="Sistema de reserves online per a restaurant" width="600" height="400" itemprop="image">
-                        </div>
-                        <div class="project-content">
-                            <h3 itemprop="name">Sistema de Reserves</h3>
-                            <p class="project-tech" itemprop="keywords">PHP, JavaScript, MySQL, FullCalendar</p>
-                            <p class="project-description" itemprop="description">Sistema de gestió de reserves per a restaurant amb confirmació per email, recordatoris i integració amb calendaris.</p>
-                            <ul class="project-features">
-                                <li>Calendari interactiu</li>
-                                <li>Confirmacions automàtiques per email</li>
-                                <li>Panel de gestió per a administradors</li>
-                                <li>Integració amb Google Calendar</li>
-                            </ul>
-                            <a href="#" class="project-link" aria-label="Veure més detalls sobre el projecte Sistema de Reserves">Veure projecte</a>
-                        </div>
-                    </article>
+                    <?php if (!empty($projectesDestacats)): ?>
+                        <?php foreach ($projectesDestacats as $projecte): ?>
+                            <?php
+                            // Processar imatge amb base URL automàtic
+                            $imatgeProjecte = $baseUrl . '/img/placeholder-project.jpg';
+                            if (!empty($projecte['imatge_portada'])) {
+                                $nomFitxer = (strpos($projecte['imatge_portada'], '/') !== false) ? basename($projecte['imatge_portada']) : $projecte['imatge_portada'];
+                                
+                                // Totes les imatges estan a /img/Projects/
+                                $rutaWeb = $baseUrl . '/img/Projects/' . $nomFitxer;
+                                $rutaFisica = __DIR__ . '/img/Projects/' . $nomFitxer;
+                                
+                                if (file_exists($rutaFisica)) {
+                                    $imatgeProjecte = $rutaWeb;
+                                }
+                            }
+                            
+                            // Processar tecnologies
+                            $tecnologiesJson = !empty($projecte['tecnologies_principals']) ? json_decode($projecte['tecnologies_principals'], true) : [];
+                            $tecnologies = is_array($tecnologiesJson) ? implode(', ', $tecnologiesJson) : 'Tecnologies diverses';
+                            ?>
+                            
+                            <article class="project-card" itemscope itemtype="https://schema.org/CreativeWork">
+                                <div class="project-image">
+                                    <img src="<?php echo htmlspecialchars($imatgeProjecte); ?>" 
+                                         alt="<?php echo htmlspecialchars($projecte['nom'] ?? 'Projecte'); ?>" 
+                                         width="600" height="400" itemprop="image"
+                                         onerror="this.src='<?php echo $baseUrl; ?>/img/placeholder-project.jpg'">
+                                </div>
+                                <div class="project-content">
+                                    <h3 itemprop="name"><?php echo htmlspecialchars($projecte['nom'] ?? 'Projecte sense nom'); ?></h3>
+                                    <p class="project-tech" itemprop="keywords"><?php echo htmlspecialchars($tecnologies); ?></p>
+                                    <p class="project-description" itemprop="description"><?php echo htmlspecialchars($projecte['descripcio_curta'] ?? 'Descripció no disponible'); ?></p>
+                                    
+                                    <?php if (!empty($projecte['descripcio_detallada'])): ?>
+                                        <div class="project-details">
+                                            <?php 
+                                            // Mostrar fragments de la descripció detallada com a característiques
+                                            $detalls = explode('.', $projecte['descripcio_detallada']);
+                                            if (count($detalls) > 1): ?>
+                                                <ul class="project-features">
+                                                    <?php foreach (array_slice($detalls, 0, 4) as $detall): ?>
+                                                        <?php if (trim($detall)): ?>
+                                                            <li><?php echo htmlspecialchars(trim($detall)); ?></li>
+                                                        <?php endif; ?>
+                                                    <?php endforeach; ?>
+                                                </ul>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                    
+                                    <?php if (!empty($projecte['url_demo']) || !empty($projecte['url_github'])): ?>
+                                        <div class="project-links">
+                                            <?php if (!empty($projecte['url_demo'])): ?>
+                                                <a href="<?php echo htmlspecialchars($projecte['url_demo']); ?>" 
+                                                   class="project-link" 
+                                                   target="_blank" 
+                                                   aria-label="Veure demo del projecte <?php echo htmlspecialchars($projecte['nom']); ?>">
+                                                   Veure demo
+                                                </a>
+                                            <?php endif; ?>
+                                            <?php if (!empty($projecte['url_github'])): ?>
+                                                <a href="<?php echo htmlspecialchars($projecte['url_github']); ?>" 
+                                                   class="project-link github" 
+                                                   target="_blank" 
+                                                   aria-label="Veure codi del projecte <?php echo htmlspecialchars($projecte['nom']); ?>">
+                                                   <i class="fab fa-github"></i> GitHub
+                                                </a>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <a href="#contacte" class="project-link" aria-label="Contactar sobre el projecte <?php echo htmlspecialchars($projecte['nom']); ?>">Més informació</a>
+                                    <?php endif; ?>
+                                </div>
+                            </article>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <!-- Projectes estàtics per fallback -->
+                        <article class="project-card" itemscope itemtype="https://schema.org/CreativeWork">
+                            <div class="project-image">
+                                <img src="<?php echo $baseUrl; ?>/img/placeholder-project.jpg" alt="Projectes en desenvolupament" width="600" height="400" itemprop="image">
+                            </div>
+                            <div class="project-content">
+                                <h3 itemprop="name">Projectes en desenvolupament</h3>
+                                <p class="project-tech" itemprop="keywords">PHP, JavaScript, MySQL</p>
+                                <p class="project-description" itemprop="description">Estic treballant en nous projectes emocionants que estaràn disponibles aviat.</p>
+                                <a href="#contacte" class="project-link">Contacta'm</a>
+                            </div>
+                        </article>
+                    <?php endif; ?>
                 </div>
                 
                 <div class="projects-cta">
@@ -179,7 +260,7 @@
                 <div class="blog-grid">
                     <article class="blog-card" itemscope itemtype="https://schema.org/BlogPosting">
                         <div class="blog-image">
-                            <img src="img/blog/laravel-best-practices.jpg" alt="Millors pràctiques per a desenvolupament Laravel" width="600" height="400" itemprop="image">
+                            <img src="<?php echo $baseUrl; ?>/img/blog/laravel-best-practices.jpg" alt="Millors pràctiques per a desenvolupament Laravel" width="600" height="400" itemprop="image">
                         </div>
                         <div class="blog-content">
                             <div class="blog-meta">
@@ -194,7 +275,7 @@
                     
                     <article class="blog-card" itemscope itemtype="https://schema.org/BlogPosting">
                         <div class="blog-image">
-                            <img src="img/blog/api-security.jpg" alt="Seguretat en APIs REST: Guia completa" width="600" height="400" itemprop="image">
+                            <img src="<?php echo $baseUrl; ?>/img/blog/api-security.jpg" alt="Seguretat en APIs REST: Guia completa" width="600" height="400" itemprop="image">
                         </div>
                         <div class="blog-content">
                             <div class="blog-meta">
@@ -209,7 +290,7 @@
                     
                     <article class="blog-card" itemscope itemtype="https://schema.org/BlogPosting">
                         <div class="blog-image">
-                            <img src="img/blog/php-8-features.jpg" alt="Novetats de PHP 8: Característiques i millores" width="600" height="400" itemprop="image">
+                            <img src="<?php echo $baseUrl; ?>/img/blog/php-8-features.jpg" alt="Novetats de PHP 8: Característiques i millores" width="600" height="400" itemprop="image">
                         </div>
                         <div class="blog-content">
                             <div class="blog-meta">
@@ -335,26 +416,26 @@
     <!-- Language Selector -->
     <div class="language-selector-bottom">
         <button class="lang-toggle" aria-label="Canviar idioma" aria-haspopup="true" aria-expanded="false">
-            <img src="img/cat.png" alt="Català" class="flag-icon">
+            <img src="<?php echo $baseUrl; ?>/img/cat.png" alt="Català" class="flag-icon">
             <span class="lang-text">CA</span>
             <i class="fas fa-chevron-up"></i>
         </button>
         <ul class="lang-dropdown" role="menu">
             <li role="none">
                 <a href="?lang=ca" class="lang-option active" role="menuitem" data-lang="ca">
-                    <img src="img/cat.png" alt="Català" class="flag-icon">
+                    <img src="<?php echo $baseUrl; ?>/img/cat.png" alt="Català" class="flag-icon">
                     <span>Català</span>
                 </a>
             </li>
             <li role="none">
                 <a href="?lang=es" class="lang-option" role="menuitem" data-lang="es">
-                    <img src="img/esp.png" alt="Español" class="flag-icon">
+                    <img src="<?php echo $baseUrl; ?>/img/esp.png" alt="Español" class="flag-icon">
                     <span>Español</span>
                 </a>
             </li>
             <li role="none">
                 <a href="?lang=en" class="lang-option" role="menuitem" data-lang="en">
-                    <img src="img/eng.png" alt="English" class="flag-icon">
+                    <img src="<?php echo $baseUrl; ?>/img/eng.png" alt="English" class="flag-icon">
                     <span>English</span>
                 </a>
             </li>

@@ -134,4 +134,25 @@ function esSuperadmin() {
     global $usuari_autenticat;
     return $usuari_autenticat['rol'] === 'superadmin';
 }
+
+/**
+ * Funció de verificació d'autenticació
+ * Comprova si l'usuari està autenticat i té permisos adequats
+ */
+function verificarAuth($rol_minim = 'lector') {
+    // La verificació ja s'ha fet al principi del fitxer
+    // Aquesta funció només comprova permisos addicionals si cal
+    if ($rol_minim !== 'lector') {
+        if (!verificarPermis($rol_minim)) {
+            if (ob_get_length()) {
+                ob_end_clean();
+            }
+            session_unset();
+            session_destroy();
+            header('Location: index.php?error=insufficient_permissions');
+            exit;
+        }
+    }
+    return true;
+}
 ?>

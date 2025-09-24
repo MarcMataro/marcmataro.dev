@@ -5,6 +5,7 @@ session_start();
 // Carregar classes necessàries per a l'autenticació
 require_once '../_classes/connexio.php';
 require_once '../_classes/usuaris.php';
+require_once '../_classes/projectes.php';
 
 // Variables per a missatges
 $error = '';
@@ -62,6 +63,27 @@ if (!isset($_SESSION['autenticat']) || !$_SESSION['autenticat']) {
     }
 }
 
+// Obtenir estadístiques del dashboard
+try {
+    $connexio = Connexio::getInstance()->getConnexio();
+    $gestorProjectes = new Projectes($connexio);
+    $estadistiquesProjectes = $gestorProjectes->obtenirEstadistiques();
+    
+    // Obtenir estadístiques generals de la base de dades
+    $stmt = $connexio->prepare("SELECT 
+        (SELECT COUNT(*) FROM projectes WHERE visible = 1) as projectes_visibles,
+        (SELECT COUNT(*) FROM usuaris) as total_usuaris,
+        (SELECT COUNT(DISTINCT DATE(data_creacio)) FROM projectes WHERE data_creacio >= DATE_SUB(NOW(), INTERVAL 30 DAY)) as dies_actius
+    ");
+    $stmt->execute();
+    $estadistiquesGenerals = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+} catch (Exception $e) {
+    error_log("Error obtenint estadístiques: " . $e->getMessage());
+    $estadistiquesProjectes = ['total' => 0, 'visibles' => 0, 'actius' => 0, 'desenvolupament' => 0];
+    $estadistiquesGenerals = ['projectes_visibles' => 0, 'total_usuaris' => 0, 'dies_actius' => 0];
+}
+
 $current_page = 'dashboard';
 include 'includes/page-header.php';
 $page_title = getPageTitle($current_page);
@@ -94,11 +116,13 @@ include 'includes/sidebar.php';
                         <i class="fas fa-briefcase"></i>
                     </div>
                     <div class="stat-info">
-                        <h3>8</h3>
+                        <h3><?php echo $estadistiquesProjectes['total'] ?? 0; ?></h3>
                         <p>Projectes</p>
-                        <div class="stat-trend positive">
-                            <i class="fas fa-arrow-up"></i>
-                            +3%
+                        <div class="stat-details">
+                            <small>
+                                <?php echo $estadistiquesProjectes['actius'] ?? 0; ?> actius • 
+                                <?php echo $estadistiquesProjectes['desenvolupament'] ?? 0; ?> en desenvolupament
+                            </small>
                         </div>
                     </div>
                 </div>
@@ -122,11 +146,12 @@ include 'includes/sidebar.php';
                         <i class="fas fa-users"></i>
                     </div>
                     <div class="stat-info">
-                        <h3>156</h3>
-                        <p>Usuaris Únics</p>
-                        <div class="stat-trend positive">
-                            <i class="fas fa-arrow-up"></i>
-                            +15%
+                        <h3><?php echo $estadistiquesGenerals['total_usuaris'] ?? 0; ?></h3>
+                        <p>Usuaris Registrats</p>
+                        <div class="stat-details">
+                            <small>
+                                <?php echo $estadistiquesGenerals['projectes_visibles'] ?? 0; ?> projectes públics
+                            </small>
                         </div>
                     </div>
                 </div>
@@ -159,25 +184,70 @@ include 'includes/sidebar.php';
             <div class="dashboard-grid">
                 <div class="dashboard-card">
                     <div class="dashboard-card-header">
-                        <h3>Entrades Recents</h3>
+                        <h3>Projectes Recents</h3>
                     </div>
                     <div class="dashboard-card-body">
                         <div class="recent-posts">
-                            <div class="recent-post">
-                                <h4>Com crear una API REST amb PHP</h4>
-                                <p>Publicat fa 2 dies</p>
-                                <span class="badge badge-success">Publicat</span>
-                            </div>
-                            <div class="recent-post">
-                                <h4>Introducció a JavaScript ES6</h4>
-                                <p>Publicat fa 5 dies</p>
-                                <span class="badge badge-success">Publicat</span>
-                            </div>
-                            <div class="recent-post">
-                                <h4>CSS Grid vs Flexbox</h4>
-                                <p>Esborrador</p>
-                                <span class="badge badge-secondary">Esborrador</span>
-                            </div>
+                            <?php
+                            try {
+                                // Obtenir projectes recents
+                                $projectesRecents = $gestorProjectes->obtenirAmbTraducio('ca', [
+                                    'limit' => 3,
+                                    'ordenar' => 'data_creacio',
+                                    'direccio' => 'DESC'
+                                ]);
+                                
+                                if (!empty($projectesRecents)) {
+                                    foreach ($projectesRecents as $projecte) {
+                                        $estatClass = match($projecte['estat']) {
+                                            'actiu' => 'badge-success',
+                                            'desenvolupament' => 'badge-warning',
+                                            'aturat' => 'badge-secondary',
+                                            'archivat' => 'badge-danger',
+                                            default => 'badge-secondary'
+                                        };
+                                        
+                                        $estatText = match($projecte['estat']) {
+                                            'actiu' => 'Actiu',
+                                            'desenvolupament' => 'En Desenvolupament',
+                                            'aturat' => 'Aturat',
+                                            'archivat' => 'Archivat',
+                                            default => 'Desconegut'
+                                        };
+                                        
+                                        $dataCreacio = new DateTime($projecte['data_creacio']);
+                                        $ara = new DateTime();
+                                        $diferencia = $ara->diff($dataCreacio);
+                                        
+                                        if ($diferencia->days == 0) {
+                                            $tempsText = "Avui";
+                                        } elseif ($diferencia->days == 1) {
+                                            $tempsText = "Fa 1 dia";
+                                        } else {
+                                            $tempsText = "Fa {$diferencia->days} dies";
+                                        }
+                                        
+                                        echo "<div class='recent-post'>";
+                                        echo "<h4>" . htmlspecialchars($projecte['nom']) . "</h4>";
+                                        echo "<p>Creat {$tempsText}</p>";
+                                        echo "<span class='badge {$estatClass}'>{$estatText}</span>";
+                                        echo "</div>";
+                                    }
+                                } else {
+                                    echo "<div class='recent-post'>";
+                                    echo "<h4>Cap projecte encara</h4>";
+                                    echo "<p>Crea el teu primer projecte</p>";
+                                    echo "<span class='badge badge-secondary'>Buit</span>";
+                                    echo "</div>";
+                                }
+                            } catch (Exception $e) {
+                                echo "<div class='recent-post'>";
+                                echo "<h4>Error carregant projectes</h4>";
+                                echo "<p>Hi ha hagut un error</p>";
+                                echo "<span class='badge badge-danger'>Error</span>";
+                                echo "</div>";
+                            }
+                            ?>
                         </div>
                     </div>
                 </div>
