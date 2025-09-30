@@ -18,6 +18,12 @@
                     <span>Gestió Blog</span>
                 </a>
             </li>
+            <li class="nav-item <?php echo ($current_page == 'agenda') ? 'active' : ''; ?>">
+                <a href="agenda.php">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Agenda</span>
+                </a>
+            </li>
             <li class="nav-item <?php echo ($current_page == 'projectes') ? 'active' : ''; ?>">
                 <a href="projectes.php">
                     <i class="fas fa-briefcase"></i>

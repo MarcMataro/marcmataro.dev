@@ -1,3 +1,353 @@
+// --- Codi JS funcional per a la gestió de formularis i TinyMCE ---
+function mostrarFormulari(tipus) {
+    const formulari = document.getElementById('formulari-idioma');
+    const title = document.getElementById('form-title');
+    const accio = document.getElementById('form-accio');
+    const btnText = document.getElementById('btn-text');
+    document.querySelector('#formulari-idioma form').reset();
+    document.getElementById('form-id').value = '';
+    document.getElementById('form-codi-hidden').value = '';
+    if (tipus === 'nou') {
+        title.textContent = 'Nou Idioma';
+        accio.value = 'crear';
+        btnText.textContent = 'Crear Idioma';
+        document.getElementById('form-codi').disabled = false;
+    }
+    formulari.style.display = 'block';
+    document.getElementById('form-codi').focus();
+}
+function editarIdioma(idioma) {
+    const formulari = document.getElementById('formulari-idioma');
+    const title = document.getElementById('form-title');
+    const accio = document.getElementById('form-accio');
+    const btnText = document.getElementById('btn-text');
+    document.getElementById('form-id').value = idioma.id;
+    document.getElementById('form-codi').value = idioma.codi;
+    document.getElementById('form-codi-hidden').value = idioma.codi;
+    document.getElementById('form-nom').value = idioma.nom;
+    document.getElementById('form-nom-natiu').value = idioma.nom_natiu;
+    document.getElementById('form-estat').value = idioma.estat;
+    document.getElementById('form-ordre').value = idioma.ordre;
+    document.getElementById('form-bandera').value = idioma.bandera_url || '';
+    title.textContent = 'Editar Idioma';
+    accio.value = 'editar';
+    btnText.textContent = 'Actualitzar Idioma';
+    document.getElementById('form-codi').disabled = (idioma.codi === 'ca');
+    formulari.style.display = 'block';
+    document.getElementById('form-nom').focus();
+}
+function tancarFormulari() {
+    document.getElementById('formulari-idioma').style.display = 'none';
+}
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        tancarFormulari();
+    }
+});
+document.addEventListener('DOMContentLoaded', function() {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            alert.style.opacity = '0';
+            setTimeout(() => alert.remove(), 300);
+        }, 5000);
+    });
+});
+function mostrarFormulariCategoria(tipus) {
+    const formulari = document.getElementById('formulari-categoria');
+    const title = document.getElementById('form-title-categoria');
+    const accio = document.getElementById('form-accio-categoria');
+    const btnText = document.getElementById('btn-text-categoria');
+    document.querySelector('#formulari-categoria form').reset();
+    document.getElementById('form-id-categoria').value = '';
+    if (tipus === 'nou') {
+        title.textContent = 'Nova Categoria';
+        accio.value = 'crear';
+        btnText.textContent = 'Crear Categoria';
+    }
+    formulari.style.display = 'block';
+    document.getElementById('form-slug-base').focus();
+}
+function editarCategoria(categoria) {
+    const formulari = document.getElementById('formulari-categoria');
+    const title = document.getElementById('form-title-categoria');
+    const accio = document.getElementById('form-accio-categoria');
+    const btnText = document.getElementById('btn-text-categoria');
+    document.getElementById('form-id-categoria').value = categoria.id;
+    document.getElementById('form-slug-base').value = categoria.slug_base;
+    document.getElementById('form-nom-ca').value = categoria.traduccions?.ca?.nom || categoria.nom || '';
+    document.getElementById('form-slug-ca').value = categoria.traduccions?.ca?.slug || '';
+    document.getElementById('form-descripcio-ca').value = categoria.traduccions?.ca?.descripcio || '';
+    document.getElementById('form-nom-es').value = categoria.traduccions?.es?.nom || '';
+    document.getElementById('form-slug-es').value = categoria.traduccions?.es?.slug || '';
+    document.getElementById('form-descripcio-es').value = categoria.traduccions?.es?.descripcio || '';
+    document.getElementById('form-nom-en').value = categoria.traduccions?.en?.nom || '';
+    document.getElementById('form-slug-en').value = categoria.traduccions?.en?.slug || '';
+    document.getElementById('form-descripcio-en').value = categoria.traduccions?.en?.descripcio || '';
+    document.getElementById('form-ordre-categoria').value = categoria.ordre || 0;
+    if (categoria.categoria_pare_id) {
+        document.getElementById('form-categoria-pare').value = categoria.categoria_pare_id;
+    }
+    title.textContent = 'Editar Categoria';
+    accio.value = 'editar';
+    btnText.textContent = 'Actualitzar Categoria';
+    formulari.style.display = 'block';
+}
+function tancarFormulariCategoria() {
+    document.getElementById('formulari-categoria').style.display = 'none';
+}
+function mostrarFormulariTag(tipus) {
+    const formulari = document.getElementById('formulari-tag');
+    const title = document.getElementById('form-title-tag');
+    const accio = document.getElementById('form-accio-tag');
+    const btnText = document.getElementById('btn-text-tag');
+    document.querySelector('#formulari-tag form').reset();
+    document.getElementById('form-id-tag').value = '';
+    if (tipus === 'nou') {
+        title.textContent = 'Nou Tag';
+        accio.value = 'crear';
+        btnText.textContent = 'Crear Tag';
+    }
+    formulari.style.display = 'block';
+    document.getElementById('form-slug-base-tag').focus();
+}
+function editarTag(tag) {
+    const formulari = document.getElementById('formulari-tag');
+    const title = document.getElementById('form-title-tag');
+    const accio = document.getElementById('form-accio-tag');
+    const btnText = document.getElementById('btn-text-tag');
+    document.getElementById('form-id-tag').value = tag.id;
+    document.getElementById('form-slug-base-tag').value = tag.slug_base;
+    document.getElementById('form-nom-ca-tag').value = tag.traduccions?.ca?.nom || tag.nom || '';
+    document.getElementById('form-slug-ca-tag').value = tag.traduccions?.ca?.slug || '';
+    document.getElementById('form-descripcio-ca-tag').value = tag.traduccions?.ca?.descripcio || '';
+    document.getElementById('form-nom-es-tag').value = tag.traduccions?.es?.nom || '';
+    document.getElementById('form-slug-es-tag').value = tag.traduccions?.es?.slug || '';
+    document.getElementById('form-descripcio-es-tag').value = tag.traduccions?.es?.descripcio || '';
+    document.getElementById('form-nom-en-tag').value = tag.traduccions?.en?.nom || '';
+    document.getElementById('form-slug-en-tag').value = tag.traduccions?.en?.slug || '';
+    document.getElementById('form-descripcio-en-tag').value = tag.traduccions?.en?.descripcio || '';
+    title.textContent = 'Editar Tag';
+    accio.value = 'editar';
+    btnText.textContent = 'Actualitzar Tag';
+    formulari.style.display = 'block';
+}
+function tancarFormulariTag() {
+    document.getElementById('formulari-tag').style.display = 'none';
+}
+function mostrarFormulariEntrada(tipus) {
+    const formulari = document.getElementById('formulari-entrada');
+    const title = document.getElementById('form-title-entrada');
+    const accio = document.getElementById('form-accio-entrada');
+    const btnText = document.getElementById('btn-text-entrada');
+    document.querySelector('#formulari-entrada form').reset();
+    document.getElementById('form-id-entrada').value = '';
+    document.querySelectorAll('.lang-tab').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.lang-content').forEach(content => content.classList.remove('active'));
+    document.querySelector('.lang-tab[data-lang="ca"]').classList.add('active');
+    document.querySelector('.lang-content[data-lang="ca"]').classList.add('active');
+    if (tipus === 'nou') {
+        title.textContent = 'Nova Entrada';
+        accio.value = 'crear';
+        btnText.textContent = 'Crear Entrada';
+    }
+    formulari.style.display = 'block';
+    document.getElementById('form-titol-ca').focus();
+}
+function editarEntrada(entrada) {
+    const formulari = document.getElementById('formulari-entrada');
+    const title = document.getElementById('form-title-entrada');
+    const accio = document.getElementById('form-accio-entrada');
+    const btnText = document.getElementById('btn-text-entrada');
+    document.getElementById('form-id-entrada').value = entrada.id;
+    document.getElementById('form-idioma-original').value = entrada.idioma_original || 'ca';
+    document.getElementById('form-estat').value = entrada.estat;
+    document.getElementById('form-format').value = entrada.format;
+    document.getElementById('form-comentaris').checked = entrada.comentaris_activats == 1;
+    document.getElementById('form-destacat').checked = entrada.destacat == 1;
+    if (entrada.traduccions) {
+        if (entrada.traduccions.ca) {
+            document.getElementById('form-titol-ca').value = entrada.traduccions.ca.titol || '';
+            document.getElementById('form-resum-ca').value = entrada.traduccions.ca.resum || '';
+            document.getElementById('form-contingut-ca').value = entrada.traduccions.ca.contingut || '';
+        }
+        if (entrada.traduccions.es) {
+            document.getElementById('form-titol-es').value = entrada.traduccions.es.titol || '';
+            document.getElementById('form-resum-es').value = entrada.traduccions.es.resum || '';
+            document.getElementById('form-contingut-es').value = entrada.traduccions.es.contingut || '';
+        }
+        if (entrada.traduccions.en) {
+            document.getElementById('form-titol-en').value = entrada.traduccions.en.titol || '';
+            document.getElementById('form-resum-en').value = entrada.traduccions.en.resum || '';
+            document.getElementById('form-contingut-en').value = entrada.traduccions.en.contingut || '';
+        }
+    }
+    title.textContent = 'Editar Entrada';
+    accio.value = 'editar';
+    btnText.textContent = 'Actualitzar Entrada';
+    formulari.style.display = 'block';
+}
+function tancarFormulariEntrada() {
+    ['form-contingut-ca', 'form-contingut-es', 'form-contingut-en'].forEach(id => {
+        const textarea = document.getElementById(id);
+        if (textarea) textarea.value = '';
+    });
+    const inputs = document.querySelectorAll('#formulari-entrada input, #formulari-entrada textarea');
+    inputs.forEach(input => {
+        if (input.type !== 'hidden') {
+            input.value = '';
+            if (input.type === 'checkbox') input.checked = false;
+        }
+    });
+    const formulari = document.getElementById('formulari-entrada');
+    if (formulari) {
+        formulari.style.display = 'none';
+    }
+}
+function canviarEstatEntrada(id, nouEstat) {
+    if (confirm(`Segur que vols canviar l'estat de l'entrada a "${nouEstat}"?`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.innerHTML = `
+            <input type="hidden" name="accio" value="canviar_estat">
+            <input type="hidden" name="id" value="${id}">
+            <input type="hidden" name="nou_estat" value="${nouEstat}">
+        `;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+function eliminarEntrada(id, titol) {
+    if (confirm(`Segur que vols eliminar l'entrada "${titol}"?\n\nAquesta acció no es pot desfer.`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.innerHTML = `
+            <input type="hidden" name="accio" value="eliminar">
+            <input type="hidden" name="id" value="${id}">
+        `;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+document.addEventListener('DOMContentLoaded', function() {
+    const btnClose = document.querySelector('#formulari-entrada .btn-close');
+    const btnCancel = document.querySelector('#formulari-entrada .btn-secondary');
+    if (btnClose) {
+        btnClose.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            tancarFormulariEntrada();
+        });
+    }
+    if (btnCancel) {
+        btnCancel.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            tancarFormulariEntrada();
+        });
+    }
+    const modalContainer = document.getElementById('formulari-entrada');
+    if (modalContainer) {
+        modalContainer.addEventListener('click', function(e) {
+            if (e.target === modalContainer) {
+                tancarFormulariEntrada();
+            }
+        });
+    }
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const formulari = document.getElementById('formulari-entrada');
+            if (formulari && formulari.style.display !== 'none') {
+                tancarFormulariEntrada();
+            }
+        }
+    });
+    const langTabs = document.querySelectorAll('.lang-tab');
+    const langContents = document.querySelectorAll('.lang-content');
+    langTabs.forEach(tab => {
+        tab.addEventListener('click', function(e) {
+            e.preventDefault();
+            const lang = this.dataset.lang;
+            langTabs.forEach(t => t.classList.remove('active'));
+            langContents.forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+            document.querySelector(`.lang-content[data-lang="${lang}"]`).classList.add('active');
+        });
+    });
+    if (typeof tinymce === 'undefined') {
+        var script = document.createElement('script');
+        script.src = 'https://cdn.tiny.cloud/1/ds0tgp458zh4vbyxcyhq2bgbf9wnk8sj1k8874ohwvqpmn39/tinymce/5/tinymce.min.js';
+        script.referrerPolicy = 'origin';
+        script.onload = function() {
+            inicialitzarTiny();
+        };
+        document.head.appendChild(script);
+    } else {
+        inicialitzarTiny();
+    }
+    function inicialitzarTiny() {
+        document.querySelectorAll('textarea[name="contingut_ca"], textarea[name="contingut_es"], textarea[name="contingut_en"]').forEach(function(textarea) {
+            textarea.removeAttribute('disabled');
+            textarea.removeAttribute('readonly');
+        });
+        tinymce.init({
+            selector: 'textarea[name="contingut_ca"], textarea[name="contingut_es"], textarea[name="contingut_en"]',
+            height: 400,
+            menubar: true,
+            statusbar: false,
+            skin: 'oxide',
+            content_css: false,
+            content_style: `
+                body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #333; margin: 10px; }
+                img { max-width: 100%; height: auto; border-radius: 4px; }
+                blockquote { border-left: 4px solid #3498db; padding-left: 1rem; margin: 1rem 0; background: #f8f9fa; padding: 1rem; border-radius: 4px; }
+            `,
+            convert_urls: true,
+            relative_urls: false,
+            remove_script_host: false,
+            document_base_url: window.location.origin,
+            branding: false,
+            promotion: false,
+            plugins: 'advlist autolink lists link image charmap print preview hr anchor pagebreak',
+            toolbar_mode: 'floating',
+            image_class_list: [
+                {title: 'Responsive', value: 'img-fluid'}
+            ],
+            image_list: [
+                // Aquesta llista s'ha d'omplir des de PHP, així que la deixem buida aquí
+            ],
+            paste_as_text: false,
+            paste_auto_cleanup_on_paste: true,
+            paste_remove_styles: false,
+            paste_remove_styles_if_webkit: false,
+            table_toolbar: "tableprops tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol",
+            forced_root_block: false,
+            readonly: false,
+            setup: function(editor) {
+                editor.on('init', function() {
+                    editor.setMode('design');
+                    const textareaName = editor.getElement().name;
+                    if (textareaName.includes('_es')) {
+                        editor.getDoc().documentElement.lang = 'es';
+                    } else if (textareaName.includes('_en')) {
+                        editor.getDoc().documentElement.lang = 'en';
+                    } else {
+                        editor.getDoc().documentElement.lang = 'ca';
+                    }
+                });
+            }
+        });
+        setTimeout(function() {
+            document.querySelectorAll('textarea[name="contingut_ca"], textarea[name="contingut_es"], textarea[name="contingut_en"]').forEach(function(textarea) {
+                textarea.removeAttribute('disabled');
+                textarea.removeAttribute('readonly');
+            });
+            tinymce.editors.forEach(function(editor) {
+                if (editor.mode !== 'design') editor.setMode('design');
+            });
+        }, 500);
+    }
+});
 /**
  * Blog Admin JavaScript
  * Gestió integral del blog multilingüe

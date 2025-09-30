@@ -1,13 +1,9 @@
-<?php
-/**
- * Panell d'Administració del Blog - Versió Simplificada PHP
- */
 
+<?php
 require_once 'includes/auth.php';
 require_once '../_classes/connexio.php';
 require_once '../_classes/blog.php';
 
-// Inicialitzar sistema de blog
 try {
     $db = Connexio::getInstance()->getConnexio();
     $blog = new Blog($db);
@@ -15,133 +11,96 @@ try {
     die("Error de connexió: " . $e->getMessage());
 }
 
-// Gestionar pestanya activa
-$tabActiva = isset($_GET['tab']) ? $_GET['tab'] : 'entrades';
+$tabActiva = $_GET['tab'] ?? 'entrades';
+$missatge = $tipusMissatge = null;
 
-// Gestionar accions
-$missatge = null;
-$tipusMissatge = null;
-
-// Funció per obtenir la llista d'imatges de la carpeta notícies
 function getImagesFromDirectory($directory) {
-    $images = [];
-    $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
     $files = glob($directory . "*.{jpg,jpeg,png,gif}", GLOB_BRACE);
-    // Ordenar per data de modificació, més recents primer
-    usort($files, function($a, $b) {
-        return filemtime($b) - filemtime($a);
-    });
-    foreach ($files as $file) {
-        $images[] = basename($file); // Obtenir només el nom de l'arxiu
-    }
-    return $images;
+    usort($files, fn($a, $b) => filemtime($b) - filemtime($a));
+    return array_map('basename', $files);
 }
-
 $images = getImagesFromDirectory("../img/blog/");
 
-// Gestionar accions per entrades
-if ($tabActiva === 'entrades' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+// --- Gestió d'accions per pestanyes ---
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $accio = $_POST['accio'] ?? '';
-        
-        switch ($accio) {
-            case 'crear':
-                $resultat = $blog->entrades->crear([
-                    'idioma_original' => $_POST['idioma_original'] ?? 'ca',
-                    'autor_id' => $_SESSION['user_id'] ?? 1,
-                    'estat' => $_POST['estat'] ?? 'esborrany',
-                    'format' => $_POST['format'] ?? 'estandard',
-                    'comentaris_activats' => isset($_POST['comentaris_activats']) ? 1 : 0,
-                    'destacat' => isset($_POST['destacat']) ? 1 : 0,
-                    'traduccions' => [
-                        'ca' => [
-                            'titol' => $_POST['titol_ca'] ?? '',
-                            'contingut' => $_POST['contingut_ca'] ?? '',
-                            'resum' => $_POST['resum_ca'] ?? ''
-                        ],
-                        'es' => [
-                            'titol' => $_POST['titol_es'] ?? '',
-                            'contingut' => $_POST['contingut_es'] ?? '',
-                            'resum' => $_POST['resum_es'] ?? ''
-                        ],
-                        'en' => [
-                            'titol' => $_POST['titol_en'] ?? '',
-                            'contingut' => $_POST['contingut_en'] ?? '',
-                            'resum' => $_POST['resum_en'] ?? ''
-                        ]
-                    ]
-                ]);
-                
-                if ($resultat['success']) {
-                    $missatge = "Entrada creada correctament";
-                    $tipusMissatge = "success";
-                } else {
-                    $missatge = implode(', ', $resultat['errors']);
-                    $tipusMissatge = "danger";
+        switch ($tabActiva) {
+            case 'entrades':
+                switch ($accio) {
+                    case 'crear':
+                        $resultat = $blog->entrades->crear([
+                            'idioma_original' => $_POST['idioma_original'] ?? 'ca',
+                            'autor_id' => $_SESSION['user_id'] ?? 1,
+                            'estat' => $_POST['estat'] ?? 'esborrany',
+                            'format' => $_POST['format'] ?? 'estandard',
+                            'comentaris_activats' => isset($_POST['comentaris_activats']) ? 1 : 0,
+                            'destacat' => isset($_POST['destacat']) ? 1 : 0,
+                            'traduccions' => [
+                                'ca' => [
+                                    'titol' => $_POST['titol_ca'] ?? '',
+                                    'contingut' => $_POST['contingut_ca'] ?? '',
+                                    'resum' => $_POST['resum_ca'] ?? ''
+                                ],
+                                'es' => [
+                                    'titol' => $_POST['titol_es'] ?? '',
+                                    'contingut' => $_POST['contingut_es'] ?? '',
+                                    'resum' => $_POST['resum_es'] ?? ''
+                                ],
+                                'en' => [
+                                    'titol' => $_POST['titol_en'] ?? '',
+                                    'contingut' => $_POST['contingut_en'] ?? '',
+                                    'resum' => $_POST['resum_en'] ?? ''
+                                ]
+                            ]
+                        ]);
+                        $missatge = $resultat['success'] ? "Entrada creada correctament" : implode(', ', $resultat['errors']);
+                        $tipusMissatge = $resultat['success'] ? "success" : "danger";
+                        break;
+                    case 'editar':
+                        $id = (int)$_POST['id'];
+                        $resultat = $blog->entrades->actualitzar($id, [
+                            'estat' => $_POST['estat'] ?? 'esborrany',
+                            'format' => $_POST['format'] ?? 'estandard',
+                            'comentaris_activats' => isset($_POST['comentaris_activats']) ? 1 : 0,
+                            'destacat' => isset($_POST['destacat']) ? 1 : 0,
+                            'traduccions' => [
+                                'ca' => [
+                                    'titol' => $_POST['titol_ca'] ?? '',
+                                    'contingut' => $_POST['contingut_ca'] ?? '',
+                                    'resum' => $_POST['resum_ca'] ?? ''
+                                ],
+                                'es' => [
+                                    'titol' => $_POST['titol_es'] ?? '',
+                                    'contingut' => $_POST['contingut_es'] ?? '',
+                                    'resum' => $_POST['resum_es'] ?? ''
+                                ],
+                                'en' => [
+                                    'titol' => $_POST['titol_en'] ?? '',
+                                    'contingut' => $_POST['contingut_en'] ?? '',
+                                    'resum' => $_POST['resum_en'] ?? ''
+                                ]
+                            ]
+                        ]);
+                        $missatge = $resultat['success'] ? "Entrada actualitzada correctament" : implode(', ', $resultat['errors']);
+                        $tipusMissatge = $resultat['success'] ? "success" : "danger";
+                        break;
+                    case 'eliminar':
+                        $id = (int)$_POST['id'];
+                        $resultat = $blog->entrades->eliminar($id);
+                        $missatge = $resultat['success'] ? "Entrada eliminada correctament" : implode(', ', $resultat['errors']);
+                        $tipusMissatge = $resultat['success'] ? "success" : "danger";
+                        break;
+                    case 'canviar_estat':
+                        $id = (int)$_POST['id'];
+                        $nouEstat = $_POST['nou_estat'];
+                        $resultat = $blog->entrades->canviarEstat($id, $nouEstat);
+                        $missatge = $resultat['success'] ? "Estat de l'entrada canviat correctament" : implode(', ', $resultat['errors']);
+                        $tipusMissatge = $resultat['success'] ? "success" : "danger";
+                        break;
                 }
                 break;
-                
-            case 'editar':
-                $id = (int)$_POST['id'];
-                $resultat = $blog->entrades->actualitzar($id, [
-                    'estat' => $_POST['estat'] ?? 'esborrany',
-                    'format' => $_POST['format'] ?? 'estandard',
-                    'comentaris_activats' => isset($_POST['comentaris_activats']) ? 1 : 0,
-                    'destacat' => isset($_POST['destacat']) ? 1 : 0,
-                    'traduccions' => [
-                        'ca' => [
-                            'titol' => $_POST['titol_ca'] ?? '',
-                            'contingut' => $_POST['contingut_ca'] ?? '',
-                            'resum' => $_POST['resum_ca'] ?? ''
-                        ],
-                        'es' => [
-                            'titol' => $_POST['titol_es'] ?? '',
-                            'contingut' => $_POST['contingut_es'] ?? '',
-                            'resum' => $_POST['resum_es'] ?? ''
-                        ],
-                        'en' => [
-                            'titol' => $_POST['titol_en'] ?? '',
-                            'contingut' => $_POST['contingut_en'] ?? '',
-                            'resum' => $_POST['resum_en'] ?? ''
-                        ]
-                    ]
-                ]);
-                
-                if ($resultat['success']) {
-                    $missatge = "Entrada actualitzada correctament";
-                    $tipusMissatge = "success";
-                } else {
-                    $missatge = implode(', ', $resultat['errors']);
-                    $tipusMissatge = "danger";
-                }
-                break;
-                
-            case 'eliminar':
-                $id = (int)$_POST['id'];
-                $resultat = $blog->entrades->eliminar($id);
-                
-                if ($resultat['success']) {
-                    $missatge = "Entrada eliminada correctament";
-                    $tipusMissatge = "success";
-                } else {
-                    $missatge = implode(', ', $resultat['errors']);
-                    $tipusMissatge = "danger";
-                }
-                break;
-                
-            case 'canviar_estat':
-                $id = (int)$_POST['id'];
-                $nouEstat = $_POST['nou_estat'];
-                $resultat = $blog->entrades->canviarEstat($id, $nouEstat);
-                
-                if ($resultat['success']) {
-                    $missatge = "Estat de l'entrada canviat correctament";
-                    $tipusMissatge = "success";
-                } else {
-                    $missatge = implode(', ', $resultat['errors']);
-                    $tipusMissatge = "danger";
-                }
-                break;
+            // ...existing code for idiomes, categories, tags...
         }
     } catch (Exception $e) {
         $missatge = "Error: " . $e->getMessage();
@@ -1334,509 +1293,8 @@ include 'includes/sidebar.php';
         </form>
     </div>
 </div>
-<script>
-// Gestió de formularis d'idiomes
-function mostrarFormulari(tipus) {
-    const formulari = document.getElementById('formulari-idioma');
-    const title = document.getElementById('form-title');
-    const accio = document.getElementById('form-accio');
-    const btnText = document.getElementById('btn-text');
-    
-    // Reset form
-    document.querySelector('#formulari-idioma form').reset();
-    document.getElementById('form-id').value = '';
-    document.getElementById('form-codi-hidden').value = '';
-    
-    if (tipus === 'nou') {
-        title.textContent = 'Nou Idioma';
-        accio.value = 'crear';
-        btnText.textContent = 'Crear Idioma';
-        document.getElementById('form-codi').disabled = false;
-    }
-    
-    formulari.style.display = 'block';
-    document.getElementById('form-codi').focus();
-}
 
-function editarIdioma(idioma) {
-    const formulari = document.getElementById('formulari-idioma');
-    const title = document.getElementById('form-title');
-    const accio = document.getElementById('form-accio');
-    const btnText = document.getElementById('btn-text');
-    
-    // Omplir formulari amb dades de l'idioma
-    document.getElementById('form-id').value = idioma.id;
-    document.getElementById('form-codi').value = idioma.codi;
-    document.getElementById('form-codi-hidden').value = idioma.codi;
-    document.getElementById('form-nom').value = idioma.nom;
-    document.getElementById('form-nom-natiu').value = idioma.nom_natiu;
-    document.getElementById('form-estat').value = idioma.estat;
-    document.getElementById('form-ordre').value = idioma.ordre;
-    document.getElementById('form-bandera').value = idioma.bandera_url || '';
-    
-    // Configurar formulari per edició
-    title.textContent = 'Editar Idioma';
-    accio.value = 'editar';
-    btnText.textContent = 'Actualitzar Idioma';
-    
-    // Deshabilitar el codi si és l'idioma per defecte
-    document.getElementById('form-codi').disabled = (idioma.codi === 'ca');
-    
-    formulari.style.display = 'block';
-    document.getElementById('form-nom').focus();
-}
-
-function tancarFormulari() {
-    document.getElementById('formulari-idioma').style.display = 'none';
-}
-
-// Tancar formulari amb Escape
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        tancarFormulari();
-    }
-});
-
-// Auto-ocultació d'alertes
-document.addEventListener('DOMContentLoaded', function() {
-    const alerts = document.querySelectorAll('.alert');
-    alerts.forEach(alert => {
-        setTimeout(() => {
-            alert.style.opacity = '0';
-            setTimeout(() => alert.remove(), 300);
-        }, 5000);
-    });
-});
-
-// Gestió de formularis de categories
-function mostrarFormulariCategoria(tipus) {
-    const formulari = document.getElementById('formulari-categoria');
-    const title = document.getElementById('form-title-categoria');
-    const accio = document.getElementById('form-accio-categoria');
-    const btnText = document.getElementById('btn-text-categoria');
-    
-    // Reset formulari
-    document.querySelector('#formulari-categoria form').reset();
-    document.getElementById('form-id-categoria').value = '';
-    
-    if (tipus === 'nou') {
-        title.textContent = 'Nova Categoria';
-        accio.value = 'crear';
-        btnText.textContent = 'Crear Categoria';
-    }
-    
-    formulari.style.display = 'block';
-    document.getElementById('form-slug-base').focus();
-}
-
-function editarCategoria(categoria) {
-    const formulari = document.getElementById('formulari-categoria');
-    const title = document.getElementById('form-title-categoria');
-    const accio = document.getElementById('form-accio-categoria');
-    const btnText = document.getElementById('btn-text-categoria');
-    
-    // Omplir formulari amb dades existents
-    document.getElementById('form-id-categoria').value = categoria.id;
-    document.getElementById('form-slug-base').value = categoria.slug_base;
-    document.getElementById('form-nom-ca').value = categoria.traduccions?.ca?.nom || categoria.nom || '';
-    document.getElementById('form-slug-ca').value = categoria.traduccions?.ca?.slug || '';
-    document.getElementById('form-descripcio-ca').value = categoria.traduccions?.ca?.descripcio || '';
-    document.getElementById('form-nom-es').value = categoria.traduccions?.es?.nom || '';
-    document.getElementById('form-slug-es').value = categoria.traduccions?.es?.slug || '';
-    document.getElementById('form-descripcio-es').value = categoria.traduccions?.es?.descripcio || '';
-    document.getElementById('form-nom-en').value = categoria.traduccions?.en?.nom || '';
-    document.getElementById('form-slug-en').value = categoria.traduccions?.en?.slug || '';
-    document.getElementById('form-descripcio-en').value = categoria.traduccions?.en?.descripcio || '';
-    document.getElementById('form-ordre-categoria').value = categoria.ordre || 0;
-    
-    // Si hi ha categoria pare
-    if (categoria.categoria_pare_id) {
-        document.getElementById('form-categoria-pare').value = categoria.categoria_pare_id;
-    }
-    
-    title.textContent = 'Editar Categoria';
-    accio.value = 'editar';
-    btnText.textContent = 'Actualitzar Categoria';
-    
-    formulari.style.display = 'block';
-}
-
-function tancarFormulariCategoria() {
-    document.getElementById('formulari-categoria').style.display = 'none';
-}
-
-// Gestió de formularis de tags
-function mostrarFormulariTag(tipus) {
-    const formulari = document.getElementById('formulari-tag');
-    const title = document.getElementById('form-title-tag');
-    const accio = document.getElementById('form-accio-tag');
-    const btnText = document.getElementById('btn-text-tag');
-    
-    // Reset formulari
-    document.querySelector('#formulari-tag form').reset();
-    document.getElementById('form-id-tag').value = '';
-    
-    if (tipus === 'nou') {
-        title.textContent = 'Nou Tag';
-        accio.value = 'crear';
-        btnText.textContent = 'Crear Tag';
-    }
-    
-    formulari.style.display = 'block';
-    document.getElementById('form-slug-base-tag').focus();
-}
-
-function editarTag(tag) {
-    const formulari = document.getElementById('formulari-tag');
-    const title = document.getElementById('form-title-tag');
-    const accio = document.getElementById('form-accio-tag');
-    const btnText = document.getElementById('btn-text-tag');
-    
-    // Omplir formulari amb dades existents
-    document.getElementById('form-id-tag').value = tag.id;
-    document.getElementById('form-slug-base-tag').value = tag.slug_base;
-    document.getElementById('form-nom-ca-tag').value = tag.traduccions?.ca?.nom || tag.nom || '';
-    document.getElementById('form-slug-ca-tag').value = tag.traduccions?.ca?.slug || '';
-    document.getElementById('form-descripcio-ca-tag').value = tag.traduccions?.ca?.descripcio || '';
-    document.getElementById('form-nom-es-tag').value = tag.traduccions?.es?.nom || '';
-    document.getElementById('form-slug-es-tag').value = tag.traduccions?.es?.slug || '';
-    document.getElementById('form-descripcio-es-tag').value = tag.traduccions?.es?.descripcio || '';
-    document.getElementById('form-nom-en-tag').value = tag.traduccions?.en?.nom || '';
-    document.getElementById('form-slug-en-tag').value = tag.traduccions?.en?.slug || '';
-    document.getElementById('form-descripcio-en-tag').value = tag.traduccions?.en?.descripcio || '';
-    
-    title.textContent = 'Editar Tag';
-    accio.value = 'editar';
-    btnText.textContent = 'Actualitzar Tag';
-    
-    formulari.style.display = 'block';
-}
-
-// Gestió de formularis de tags
-function mostrarFormulariTag(tipus) {
-    const formulari = document.getElementById('formulari-tag');
-    const title = document.getElementById('form-title-tag');
-    const accio = document.getElementById('form-accio-tag');
-    const btnText = document.getElementById('btn-text-tag');
-    
-    // Reset formulari
-    document.querySelector('#formulari-tag form').reset();
-    document.getElementById('form-id-tag').value = '';
-    
-    if (tipus === 'nou') {
-        title.textContent = 'Nou Tag';
-        accio.value = 'crear';
-        btnText.textContent = 'Crear Tag';
-    }
-    
-    formulari.style.display = 'block';
-    document.getElementById('form-slug-base-tag').focus();
-}
-
-function editarTag(tag) {
-    const formulari = document.getElementById('formulari-tag');
-    const title = document.getElementById('form-title-tag');
-    const accio = document.getElementById('form-accio-tag');
-    const btnText = document.getElementById('btn-text-tag');
-    
-    // Omplir formulari amb dades existents
-    document.getElementById('form-id-tag').value = tag.id;
-    document.getElementById('form-slug-base-tag').value = tag.slug_base;
-    
-    // Omplir traduccions
-    if (tag.traduccions) {
-        // Català
-        if (tag.traduccions.ca) {
-            document.getElementById('form-nom-ca-tag').value = tag.traduccions.ca.nom || '';
-            document.getElementById('form-slug-ca-tag').value = tag.traduccions.ca.slug || '';
-            document.getElementById('form-descripcio-ca-tag').value = tag.traduccions.ca.descripcio || '';
-        }
-        // Espanyol
-        if (tag.traduccions.es) {
-            document.getElementById('form-nom-es-tag').value = tag.traduccions.es.nom || '';
-            document.getElementById('form-slug-es-tag').value = tag.traduccions.es.slug || '';
-            document.getElementById('form-descripcio-es-tag').value = tag.traduccions.es.descripcio || '';
-        }
-        // Anglès
-        if (tag.traduccions.en) {
-            document.getElementById('form-nom-en-tag').value = tag.traduccions.en.nom || '';
-            document.getElementById('form-slug-en-tag').value = tag.traduccions.en.slug || '';
-            document.getElementById('form-descripcio-en-tag').value = tag.traduccions.en.descripcio || '';
-        }
-    }
-    
-    title.textContent = 'Editar Tag';
-    accio.value = 'editar';
-    btnText.textContent = 'Actualitzar Tag';
-    
-    formulari.style.display = 'block';
-}
-
-function tancarFormulariTag() {
-    document.getElementById('formulari-tag').style.display = 'none';
-}
-
-// Gestió de formularis d'entrades
-function mostrarFormulariEntrada(tipus) {
-    const formulari = document.getElementById('formulari-entrada');
-    const title = document.getElementById('form-title-entrada');
-    const accio = document.getElementById('form-accio-entrada');
-    const btnText = document.getElementById('btn-text-entrada');
-    
-    // Reset formulari
-    document.querySelector('#formulari-entrada form').reset();
-    document.getElementById('form-id-entrada').value = '';
-    
-    // Activar primera pestanya
-    document.querySelectorAll('.lang-tab').forEach(tab => tab.classList.remove('active'));
-    document.querySelectorAll('.lang-content').forEach(content => content.classList.remove('active'));
-    document.querySelector('.lang-tab[data-lang="ca"]').classList.add('active');
-    document.querySelector('.lang-content[data-lang="ca"]').classList.add('active');
-    
-    if (tipus === 'nou') {
-        title.textContent = 'Nova Entrada';
-        accio.value = 'crear';
-        btnText.textContent = 'Crear Entrada';
-    }
-    
-    formulari.style.display = 'block';
-    document.getElementById('form-titol-ca').focus();
-}
-
-function editarEntrada(entrada) {
-    const formulari = document.getElementById('formulari-entrada');
-    const title = document.getElementById('form-title-entrada');
-    const accio = document.getElementById('form-accio-entrada');
-    const btnText = document.getElementById('btn-text-entrada');
-    
-    // Omplir dades generals
-    document.getElementById('form-id-entrada').value = entrada.id;
-    document.getElementById('form-idioma-original').value = entrada.idioma_original || 'ca';
-    document.getElementById('form-estat').value = entrada.estat;
-    document.getElementById('form-format').value = entrada.format;
-    document.getElementById('form-comentaris').checked = entrada.comentaris_activats == 1;
-    document.getElementById('form-destacat').checked = entrada.destacat == 1;
-    
-    // Omplir traduccions
-    if (entrada.traduccions) {
-        if (entrada.traduccions.ca) {
-            document.getElementById('form-titol-ca').value = entrada.traduccions.ca.titol || '';
-            document.getElementById('form-resum-ca').value = entrada.traduccions.ca.resum || '';
-            document.getElementById('form-contingut-ca').value = entrada.traduccions.ca.contingut || '';
-        }
-        if (entrada.traduccions.es) {
-            document.getElementById('form-titol-es').value = entrada.traduccions.es.titol || '';
-            document.getElementById('form-resum-es').value = entrada.traduccions.es.resum || '';
-            document.getElementById('form-contingut-es').value = entrada.traduccions.es.contingut || '';
-        }
-        if (entrada.traduccions.en) {
-            document.getElementById('form-titol-en').value = entrada.traduccions.en.titol || '';
-            document.getElementById('form-resum-en').value = entrada.traduccions.en.resum || '';
-            document.getElementById('form-contingut-en').value = entrada.traduccions.en.contingut || '';
-        }
-    }
-    
-    title.textContent = 'Editar Entrada';
-    accio.value = 'editar';
-    btnText.textContent = 'Actualitzar Entrada';
-    
-    formulari.style.display = 'block';
-}
-
-function tancarFormulariEntrada() {
-    // Netejar textareas
-    ['form-contingut-ca', 'form-contingut-es', 'form-contingut-en'].forEach(id => {
-        const textarea = document.getElementById(id);
-        if (textarea) textarea.value = '';
-    });
-    // Netejar altres camps
-    const inputs = document.querySelectorAll('#formulari-entrada input, #formulari-entrada textarea');
-    inputs.forEach(input => {
-        if (input.type !== 'hidden') {
-            input.value = '';
-            if (input.type === 'checkbox') input.checked = false;
-        }
-    });
-    // Tancar el formulari
-    const formulari = document.getElementById('formulari-entrada');
-    if (formulari) {
-        formulari.style.display = 'none';
-    }
-}
-
-
-
-function canviarEstatEntrada(id, nouEstat) {
-    if (confirm(`Segur que vols canviar l'estat de l'entrada a "${nouEstat}"?`)) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.innerHTML = `
-            <input type="hidden" name="accio" value="canviar_estat">
-            <input type="hidden" name="id" value="${id}">
-            <input type="hidden" name="nou_estat" value="${nouEstat}">
-        `;
-        document.body.appendChild(form);
-        form.submit();
-    }
-}
-
-function eliminarEntrada(id, titol) {
-    if (confirm(`Segur que vols eliminar l'entrada "${titol}"?\n\nAquesta acció no es pot desfer.`)) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.innerHTML = `
-            <input type="hidden" name="accio" value="eliminar">
-            <input type="hidden" name="id" value="${id}">
-        `;
-        document.body.appendChild(form);
-        form.submit();
-    }
-}
-
-// Gestió de pestanyes d'idiomes
-document.addEventListener('DOMContentLoaded', function() {
-    // CKEditor no necessita bloqueig de calls externes (completament offline)
-    
-    // Afegir event listeners adicionals per botons de tancar
-    const btnClose = document.querySelector('#formulari-entrada .btn-close');
-    const btnCancel = document.querySelector('#formulari-entrada .btn-secondary');
-    
-    if (btnClose) {
-        btnClose.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            tancarFormulariEntrada();
-        });
-    }
-    
-    if (btnCancel) {
-        btnCancel.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            tancarFormulariEntrada();
-        });
-    }
-    
-    // Tancar modal fent clic fora
-    const modalContainer = document.getElementById('formulari-entrada');
-    if (modalContainer) {
-        modalContainer.addEventListener('click', function(e) {
-            if (e.target === modalContainer) {
-                tancarFormulariEntrada();
-            }
-        });
-    }
-    
-    // Tancar modal amb tecla Escape
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            const formulari = document.getElementById('formulari-entrada');
-            if (formulari && formulari.style.display !== 'none') {
-                tancarFormulariEntrada();
-            }
-        }
-    });
-    
-    const langTabs = document.querySelectorAll('.lang-tab');
-    const langContents = document.querySelectorAll('.lang-content');
-    
-    langTabs.forEach(tab => {
-        tab.addEventListener('click', function(e) {
-            e.preventDefault();
-            const lang = this.dataset.lang;
-            
-            // Activar pestanya
-            langTabs.forEach(t => t.classList.remove('active'));
-            langContents.forEach(c => c.classList.remove('active'));
-            
-            this.classList.add('active');
-            document.querySelector(`.lang-content[data-lang="${lang}"]`).classList.add('active');
-        });
-    });
-    // Carrega TinyMCE des del CDN si no està carregat
-    if (typeof tinymce === 'undefined') {
-        var script = document.createElement('script');
-        script.src = 'https://cdn.tiny.cloud/1/ds0tgp458zh4vbyxcyhq2bgbf9wnk8sj1k8874ohwvqpmn39/tinymce/5/tinymce.min.js';
-        script.referrerPolicy = 'origin';
-        script.onload = function() {
-            inicialitzarTiny();
-        };
-        document.head.appendChild(script);
-    } else {
-        inicialitzarTiny();
-    }
-
-    function inicialitzarTiny() {
-        // Assegura que els textareas no estan deshabilitats abans d'inicialitzar TinyMCE
-        document.querySelectorAll('textarea[name="contingut_ca"], textarea[name="contingut_es"], textarea[name="contingut_en"]').forEach(function(textarea) {
-            textarea.removeAttribute('disabled');
-            textarea.removeAttribute('readonly');
-        });
-
-        tinymce.init({
-            selector: 'textarea[name="contingut_ca"], textarea[name="contingut_es"], textarea[name="contingut_en"]',
-            height: 400,
-            menubar: true,
-            statusbar: false,
-            skin: 'oxide',
-            content_css: false,
-            content_style: `
-                body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #333; margin: 10px; }
-                img { max-width: 100%; height: auto; border-radius: 4px; }
-                blockquote { border-left: 4px solid #3498db; padding-left: 1rem; margin: 1rem 0; background: #f8f9fa; padding: 1rem; border-radius: 4px; }
-            `,
-            convert_urls: true,
-            relative_urls: false,
-            remove_script_host: false,
-            document_base_url: '<?php echo "http://" . $_SERVER['HTTP_HOST']; ?>',
-            branding: false,
-            promotion: false,
-            plugins: 'advlist autolink lists link image charmap print preview hr anchor pagebreak',
-            toolbar_mode: 'floating',
-            image_class_list: [
-                {title: 'Responsive', value: 'img-fluid'}
-            ],
-            image_list: [
-                <?php foreach ($images as $image): ?>
-                {title: '<?php echo htmlspecialchars(basename($image)); ?>', value: '/marcmataro.dev/img/blog/<?php echo htmlspecialchars($image); ?>'},
-                <?php endforeach; ?>
-            ],
-            paste_as_text: false,
-            paste_auto_cleanup_on_paste: true,
-            paste_remove_styles: false,
-            paste_remove_styles_if_webkit: false,
-            table_toolbar: "tableprops tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol",
-            forced_root_block: false,
-            readonly: false,
-            setup: function(editor) {
-                editor.on('init', function() {
-                    // Força l'editor a estar actiu
-                    editor.setMode('design');
-                    const textareaName = editor.getElement().name;
-                    if (textareaName.includes('_es')) {
-                        editor.getDoc().documentElement.lang = 'es';
-                    } else if (textareaName.includes('_en')) {
-                        editor.getDoc().documentElement.lang = 'en';
-                    } else {
-                        editor.getDoc().documentElement.lang = 'ca';
-                    }
-                });
-            }
-        });
-
-        // Workaround: després d'inicialitzar, elimina disabled/readonly si TinyMCE els ha posat
-        setTimeout(function() {
-            document.querySelectorAll('textarea[name="contingut_ca"], textarea[name="contingut_es"], textarea[name="contingut_en"]').forEach(function(textarea) {
-                textarea.removeAttribute('disabled');
-                textarea.removeAttribute('readonly');
-            });
-            tinymce.editors.forEach(function(editor) {
-                if (editor.mode !== 'design') editor.setMode('design');
-            });
-        }, 500);
-    }
-    // ...
-});
-</script>
+<!-- JS Blog Admin -->
+<script src="js/blog-admin.js"></script>
 
 <?php require_once 'includes/footer.php'; ?>

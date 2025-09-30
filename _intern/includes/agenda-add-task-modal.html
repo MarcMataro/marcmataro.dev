@@ -1,0 +1,60 @@
+<!-- Formulari modal per afegir una tasca -->
+<div id="modal-add-task" class="agenda-modal" style="display:none;">
+  <div class="agenda-modal-content">
+    <span class="agenda-modal-close" id="close-add-task-modal">&times;</span>
+    <h2>Afegir nova tasca</h2>
+    <form id="form-add-task">
+      <input type="hidden" id="tasca-id" name="id" value="">
+      <div class="agenda-form-section">
+        <label for="task-title">Títol *</label>
+        <input type="text" id="task-title" name="titol" required>
+        <label for="task-desc">Descripció</label>
+        <textarea id="task-desc" name="descripcio"></textarea>
+      </div>
+      <div class="agenda-form-section agenda-form-row">
+        <div>
+          <label for="task-date">Data *</label>
+          <input type="date" id="task-date" name="data_tasca" required>
+        </div>
+        <div>
+          <label for="task-start">Hora inici</label>
+          <input type="time" id="task-start" name="hora_inici">
+        </div>
+        <div>
+          <label for="task-end">Hora fi</label>
+          <input type="time" id="task-end" name="hora_fi">
+        </div>
+      </div>
+      <div class="agenda-form-section agenda-form-row">
+        <div>
+          <label for="task-priority">Prioritat</label>
+          <select id="task-priority" name="prioritat">
+            <option value="baixa">Baixa</option>
+            <option value="mitjana" selected>Mitjana</option>
+            <option value="alta">Alta</option>
+          </select>
+        </div>
+        <div>
+          <label for="task-category">Categoria</label>
+          <select id="task-category" name="categoria">
+            <option value="treball">Treball</option>
+            <option value="personal">Personal</option>
+            <option value="salut">Salut</option>
+            <option value="formacio">Formació</option>
+            <option value="llar">Llar</option>
+            <option value="social">Social</option>
+            <option value="altres">Altres</option>
+          </select>
+        </div>
+      </div>
+      <div class="agenda-form-section agenda-checkbox-group">
+        <label><input type="checkbox" name="es_important"> Important</label>
+        <label><input type="checkbox" name="es_urgent"> Urgent</label>
+      </div>
+      <div class="agenda-form-section agenda-form-actions">
+        <button type="submit" class="agenda-btn agenda-add-task-btn">Desar tasca</button>
+        <div id="add-task-msg"></div>
+      </div>
+    </form>
+  </div>
+</div>
