@@ -50,6 +50,15 @@ function getPageInfo($current_page) {
                 ['name' => 'Inici', 'url' => 'dashboard.php'],
                 ['name' => 'Configuració', 'url' => null]
             ]
+        ],
+        'blog' => [
+            'title' => 'Gestió Integral del Blog',
+            'description' => 'Panell unificat per gestionar contingut multilingüe: entrades, categories, comentaris i usuaris',
+            'icon' => 'fas fa-blog',
+            'breadcrumb' => [
+                ['name' => 'Inici', 'url' => 'dashboard.php'],
+                ['name' => 'Gestió del Blog', 'url' => null]
+            ]
         ]
     ];
     

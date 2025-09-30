@@ -1,6 +1,6 @@
 <?php
 // Protecció d'autenticació primer de tot
-require_once 'includes/auth-simple.php';
+require_once 'includes/auth.php';
 
 $current_page = 'entrades';
 include 'includes/page-header.php';

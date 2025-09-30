@@ -100,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'descripcio_detallada_es' => !empty($_POST['descripcio_detallada_es']) ? trim($_POST['descripcio_detallada_es']) : null,
             'descripcio_detallada_en' => !empty($_POST['descripcio_detallada_en']) ? trim($_POST['descripcio_detallada_en']) : null,
             'estat' => $_POST['estat'] ?? 'desenvolupament',
-            'visible' => isset($_POST['visible']) ? 1 : 0,
+            'visible' => (int)($_POST['visible'] ?? 0),
             'url_demo' => !empty($_POST['url_demo']) ? trim($_POST['url_demo']) : null,
             'url_github' => !empty($_POST['url_github']) ? trim($_POST['url_github']) : null,
             'url_documentacio' => !empty($_POST['url_documentacio']) ? trim($_POST['url_documentacio']) : null,
@@ -482,16 +482,7 @@ generarPageHeader(
                         <small>Selecciona l'estat actual del projecte</small>
                     </div>
                     
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" 
-                                   name="visible" 
-                                   value="1"
-                                   <?= $esEdicio && ($projecte['visible'] ?? 0) ? 'checked' : '' ?>>
-                            Projecte visible al públic
-                        </label>
-                        <small>Marca aquesta casella perquè el projecte aparegui al portafoli</small>
-                    </div>
+
                     
                     <div class="form-group">
                         <label for="data_publicacio">Data de publicació</label>

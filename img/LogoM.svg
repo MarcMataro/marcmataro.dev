@@ -1,0 +1,14 @@
+
+<svg width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Diamond shape with connecting dots -->
+  <polygon points="200,70 330,200 200,330 70,200" stroke="#2563EB" stroke-width="16" fill="none"/>
+  <circle cx="200" cy="70" r="16" fill="#2563EB"/>
+  <circle cx="330" cy="200" r="16" fill="#10B981"/>
+  <circle cx="200" cy="330" r="16" fill="#10B981"/>
+  <circle cx="70" cy="200" r="16" fill="#2563EB"/>
+  <!-- Network structure inside diamond -->
+  <polyline points="200,200 265,200 200,135 200,200 135,200" stroke="#10B981" stroke-width="10" fill="none"/>
+  <circle cx="200" cy="200" r="10" fill="#10B981"/>
+  <!-- Text with angular brackets -->
+  <text x="50" y="380" font-family="monospace" font-size="48" fill="#555"><Marc Mataró></text>
+</svg>

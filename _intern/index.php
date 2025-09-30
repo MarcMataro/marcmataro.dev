@@ -35,10 +35,10 @@ if (isset($_SESSION['autenticat']) && $_SESSION['autenticat']) {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="/img/Logo reduit.png" type="image/png">
+    <link rel="preload" href="../css/normalize.css" as="style">
     <link rel="preload" href="css/pindex.css" as="style">
-    <link rel="preload" href="../css/Normalize.css" as="style">
+    <link href="../css/normalize.css" rel="stylesheet">
     <link href="css/pindex.css" rel="stylesheet">
-    <link href="../css/Normalize.css" rel="stylesheet">
     <title>Emmaalcala.com - Panell d'administració</title>
 </head>
 <body>

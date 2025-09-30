@@ -13,6 +13,7 @@
     <meta property="og:locale" content="ca_ES">
     <link rel="canonical" href="https://www.marcmataro.com">
     <title>Marc Mataró | Arquitecte de solucions web</title>
+    <link rel="stylesheet" href="css/normalize.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/bootstrap.min.css">
@@ -20,19 +21,11 @@
     <?php
     // Funció per obtenir el base URL del projecte
     function getBaseUrl() {
-        $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
-        $host = $_SERVER['HTTP_HOST'];
-        
-        // Detectar el subdirectori automàticament
-        $scriptName = $_SERVER['SCRIPT_NAME']; // Ex: /marcmataro.dev/index.php
-        $pathParts = explode('/', $scriptName);
-        
-        // Si estem en un subdirectori (com /marcmataro.dev/), el detectem
-        if (count($pathParts) > 2 && $pathParts[1] !== '') {
-            return '/' . $pathParts[1]; // Retorna /marcmataro.dev
-        }
-        
-        return ''; // Si estem a l'arrel del domini
+        // Retorna sempre el path correcte per a recursos estàtics
+        $scriptName = $_SERVER['SCRIPT_NAME'];
+        $dir = str_replace('\\', '/', dirname($scriptName));
+        if ($dir === '/' || $dir === '\\') return '';
+        return $dir;
     }
     
     $baseUrl = getBaseUrl();
@@ -46,10 +39,12 @@
         $db = $connexio->getConnexio();
         $gestorProjectes = new Projectes($db);
         
-        // Obtenir projectes visibles i actius en català
+        // Obtenir projectes visibles (tant actius com en desenvolupament) en català
         $opcions = [
-            'on' => 'visible = 1 AND estat IN ("actiu", "desenvolupament")',
-            'ordre' => 'data_creacio DESC',
+            'visible' => 1,
+            // Temporalment sense filtre d'estat per veure tots els projectes visibles
+            'ordenar' => 'data_creacio',
+            'direccio' => 'DESC',
             'limit' => 6  // Mostrar només 6 projectes destacats
         ];
         

@@ -13,6 +13,7 @@
     <meta property="og:locale" content="ca_ES">
     <link rel="canonical" href="https://www.marcmataro.com">
     <title>Marc Mataró | Arquitecte de solucions web</title>
+    <link rel="stylesheet" href="css/normalize.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/aboutme.css">

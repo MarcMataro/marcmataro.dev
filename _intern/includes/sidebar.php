@@ -12,10 +12,10 @@
                     <span>Dashboard</span>
                 </a>
             </li>
-            <li class="nav-item <?php echo ($current_page == 'entrades') ? 'active' : ''; ?>">
-                <a href="entrades.php">
-                    <i class="fas fa-newspaper"></i>
-                    <span>Entrades de Blog</span>
+            <li class="nav-item <?php echo ($current_page == 'blog') ? 'active' : ''; ?>">
+                <a href="blog.php">
+                    <i class="fas fa-blog"></i>
+                    <span>Gestió Blog</span>
                 </a>
             </li>
             <li class="nav-item <?php echo ($current_page == 'projectes') ? 'active' : ''; ?>">

@@ -1,6 +1,6 @@
 <?php
 // Protecció d'autenticació primer de tot
-require_once 'includes/auth-simple.php';
+require_once 'includes/auth.php';
 require_once '../_classes/connexio.php';
 require_once '../_classes/projectes.php';
 
